@@ -5,22 +5,37 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 
+/**
+ * @Author JusticeOwens
+ *
+ * This class handles the creation of the file I/O related to creating the 5-letter-words.txt file and counting each letters
+ * occurrence for all 5-letter words
+ */
 public class WordList {
-    File dictionary = new File("resources/words_alpha.txt");
-    File wordList = new File("resources/5-letter-words.txt");
-    File countOfLetters = new File("resources/letter-count.txt");
+    private File dictionary = new File("resources/words_alpha.txt");
+    private File wordList = new File("resources/5-letter-words.txt");
+    private File countOfLetters = new File("resources/letter-count.txt");
 
+    //CONSTRUCTOR
     public WordList() {
-        try(Scanner fileCheck = new Scanner(wordList);){
+        //Checks to see if file exists or is empty.
+        try(Scanner fileCheck = new Scanner(wordList)){
+            //Exists but empty. Runs WordListSetup()
             if(!fileCheck.hasNextLine()){
                 WordlistSetup();
             }
+            //Does not exist and runs WordListSetup()
         } catch(FileNotFoundException e){
             System.out.println("5 letter word list not found.");
             WordlistSetup();
         }
     }
 
+    /**
+     * Creates the 5-letter words file if it doesn't exist in the proper folder using the words_alpha.txt file
+     *
+     * @returns null
+     */
     public void WordlistSetup(){
         System.out.println("Creating 5 letter word list...");
         String word;
@@ -41,7 +56,14 @@ public class WordList {
         }
     }
 
+    /**
+     * Reads all 5-letter words from the .txt file and counts each letters occurrence throughout the whole file.
+     *
+     * @return Hashmap containing Char A-Z as the key and count as the value
+     */
     public HashMap<String, Integer> LetterCount(){
+        System.out.println("Counting letters of all words in " + wordList.toPath());
+
         if(countOfLetters.exists()){
             countOfLetters.delete();
         }
