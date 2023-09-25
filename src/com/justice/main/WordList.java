@@ -6,9 +6,9 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class WordList {
-    File dictionary = new File("resources/dictionary.csv");
+    File dictionary = new File("resources/words_alpha.txt");
     File wordList = new File("resources/5-letter-words.txt");
-    File letterCount = new File("resources/letter-count.txt");
+    File countOfLetters = new File("resources/letter-count.txt");
 
     public WordList() {
         try(Scanner fileCheck = new Scanner(wordList);){
@@ -19,30 +19,20 @@ public class WordList {
             System.out.println("5 letter word list not found.");
             WordlistSetup();
         }
-
-        LetterCount();
     }
 
     public void WordlistSetup(){
         System.out.println("Creating 5 letter word list...");
-
-        String[] word;
-        String dictionaryLine;
-        List<String> enteredWords = new ArrayList<>();
+        String word;
 
         try(Scanner fileRead = new Scanner(dictionary);
             PrintWriter printWriter = new PrintWriter(wordList);){
 
             while(fileRead.hasNextLine()){
-                dictionaryLine = fileRead.nextLine();
-                word = dictionaryLine.split(",");
-                if(word[0].length() > 3) {
-                    word[0] = word[0].substring(1, word[0].length() - 1);
-                }
+                word = fileRead.nextLine();
 
-                if(!enteredWords.contains(word[0]) && word[0].length() == 5 && (!word[0].contains(" ") && !word[0].contains("-") && !word[0].contains("'") && !word[0].contains("/"))){
-                    enteredWords.add(word[0]);
-                    printWriter.println(word[0]);
+                if(word.length() == 5 && !word.contains(" ")){
+                    printWriter.println(word);
                 }
             }
 
@@ -51,17 +41,18 @@ public class WordList {
         }
     }
 
-    public void LetterCount(){
-        if(letterCount.exists()){
-            letterCount.delete();
+    public HashMap<String, Integer> LetterCount(){
+        if(countOfLetters.exists()){
+            countOfLetters.delete();
         }
 
+        HashMap<String, Integer> counterMap = new HashMap<>();
+
         try(Scanner inputCount = new Scanner(wordList);
-            PrintWriter printWriter = new PrintWriter(letterCount);){
+            PrintWriter printWriter = new PrintWriter(countOfLetters);){
             String wordToCount;
             String[] wordArray;
 
-            HashMap<String, Integer> counterMap = new HashMap<>();
 
             while(inputCount.hasNextLine()){
                 wordToCount = inputCount.nextLine();
@@ -77,11 +68,13 @@ public class WordList {
             }
 
             for(Map.Entry<String, Integer> entry: counterMap.entrySet()){
-                printWriter.println(entry.getKey() + ": " + entry.getValue());
+                printWriter.println(entry.getKey() + "," + entry.getValue());
             }
 
         } catch (FileNotFoundException e){
             System.err.println(wordList.toPath() + " not found");
         }
+
+        return counterMap;
     }
 }
