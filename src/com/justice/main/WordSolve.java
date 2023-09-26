@@ -57,15 +57,20 @@ public class WordSolve {
 
     public String[] getAnswer(String[] topLetters){
         String[] answer = new String[5];
+        Arrays.sort(topLetters);
 
         try(Scanner listInput = new Scanner(wordList)){
             String word;
-            String lettersToCompare = topLetters.toString();
 
             while(listInput.hasNextLine()){
-                word = listInput.nextLine();
-                if(word.contains(lettersToCompare)){
+                word = listInput.nextLine().toUpperCase();
+
+                String[] wordArray = word.split("");
+                Arrays.sort(wordArray);
+
+                if(Arrays.equals(wordArray, topLetters)){
                     answer = word.split("");
+                    return answer;
                 }
             }
 
