@@ -6,10 +6,9 @@ public class Application {
 
     public static void main(String args[]){
         WordList wordList = new WordList();
-        HashMap<String, Integer> wordMap = wordList.LetterCount();
+        HashMap<String, Integer> letterMap = wordList.LetterCount();
 
-        WordSolve solve = new WordSolve(wordMap);
-
+        WordSolve solve = new WordSolve(letterMap);
 
     }
 }
