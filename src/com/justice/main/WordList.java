@@ -12,49 +12,13 @@ import java.util.*;
  * occurrence for all 5-letter words
  */
 public class WordList {
-    private File dictionary = new File("resources/words_alpha.txt");
-    private File wordList = new File("resources/5-letter-words.txt");
+    private File wordList = new File("resources/words.txt");
     private File countOfLetters = new File("resources/letter-count.txt");
 
     //CONSTRUCTOR
     public WordList() {
-        //Checks to see if file exists or is empty.
-        try(Scanner fileCheck = new Scanner(wordList)){
-            //Exists but empty. Runs WordListSetup()
-            if(!fileCheck.hasNextLine()){
-                wordlistSetup();
-            }
-            //Does not exist and runs WordListSetup()
-        } catch(FileNotFoundException e){
-            System.out.println("5 letter word list not found.");
-            wordlistSetup();
-        }
     }
 
-    /**
-     * Creates the 5-letter words file if it doesn't exist in the proper folder using the words_alpha.txt file
-     *
-     * @returns null
-     */
-    public void wordlistSetup(){
-        System.out.println("Creating 5 letter word list...");
-        String word;
-
-        try(Scanner fileRead = new Scanner(dictionary);
-            PrintWriter printWriter = new PrintWriter(wordList);){
-
-            while(fileRead.hasNextLine()){
-                word = fileRead.nextLine();
-
-                if(word.length() == 5 && !word.contains(" ")){
-                    printWriter.println(word);
-                }
-            }
-
-        } catch(FileNotFoundException e){
-            System.err.println("File not found. Check that all necessary files are in correct location.");
-        }
-    }
 
     /**
      * Reads all 5-letter words from the .txt file and counts each letters occurrence throughout the whole file.
@@ -63,10 +27,6 @@ public class WordList {
      */
     public HashMap<String, Integer> letterCount(){
         System.out.println("Counting letters of all words in " + wordList.toPath());
-
-        if(countOfLetters.exists()){
-            countOfLetters.delete();
-        }
 
         HashMap<String, Integer> counterMap = new HashMap<>();
 

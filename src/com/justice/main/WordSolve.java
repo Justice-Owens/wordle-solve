@@ -6,7 +6,7 @@ import java.util.*;
 
 public class WordSolve {
     private HashMap<String, Integer> letterMap;
-    File wordList = new File("resources/5-letter-words.txt");
+    File wordList = new File("resources/words.txt");
 
     public WordSolve(HashMap<String, Integer> letterMap) {
         this.letterMap = letterMap;
@@ -52,7 +52,11 @@ public class WordSolve {
         return topLetters;
     }
 
-    public void removePossibleLetters(){
+    public void removePossibleLetters(String[] incorrectLetters){
+
+        for(String s: incorrectLetters){
+            letterMap.remove(s);
+        }
     }
 
     public String[] getAnswer(String[] topLetters){
