@@ -84,4 +84,8 @@ public class WordSolve {
 
         return answer;
     }
+
+    public void solve(){
+
+    }
 }
