@@ -22,12 +22,12 @@ public class WordList {
         try(Scanner fileCheck = new Scanner(wordList)){
             //Exists but empty. Runs WordListSetup()
             if(!fileCheck.hasNextLine()){
-                WordlistSetup();
+                wordlistSetup();
             }
             //Does not exist and runs WordListSetup()
         } catch(FileNotFoundException e){
             System.out.println("5 letter word list not found.");
-            WordlistSetup();
+            wordlistSetup();
         }
     }
 
@@ -36,7 +36,7 @@ public class WordList {
      *
      * @returns null
      */
-    public void WordlistSetup(){
+    public void wordlistSetup(){
         System.out.println("Creating 5 letter word list...");
         String word;
 
@@ -61,7 +61,7 @@ public class WordList {
      *
      * @return Hashmap containing Char A-Z as the key and count as the value
      */
-    public HashMap<String, Integer> LetterCount(){
+    public HashMap<String, Integer> letterCount(){
         System.out.println("Counting letters of all words in " + wordList.toPath());
 
         if(countOfLetters.exists()){
