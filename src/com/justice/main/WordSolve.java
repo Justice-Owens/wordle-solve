@@ -6,6 +6,8 @@ import java.util.*;
 
 public class WordSolve {
     private HashMap<String, Integer> letterMap;
+    private HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
+    private int counter = 0;
     File wordList = new File("resources/words.txt");
 
     public WordSolve(HashMap<String, Integer> letterMap) {
@@ -86,6 +88,47 @@ public class WordSolve {
     }
 
     public void solve(){
+        Scanner userIn = new Scanner(System.in);
+        String[] wrongLetters;
+        String[] wrongPosition;
+        String[] letters = getTopLetters();
+        String[] answer = getAnswer(letters);
 
+        if(counter == 6){
+            System.out.println("All guesses used!");
+            return;
+        }
+
+        System.out.println("Guess: ");
+        for(String s: answer){
+            System.out.print(s);
+        }
+        System.out.println("Which letters were incorrect: ");
+        wrongLetters = userIn.nextLine().split(",");
+
+        removePossibleLetters(wrongLetters);
+
+        System.out.println("Which letters were correct and in the wrong position?");
+        wrongPosition = userIn.nextLine().split(",");
+
+        for(String s: wrongPosition){
+            if(!wrongPositionIndex.containsKey(s)) {
+                wrongPositionIndex.put(s, new ArrayList<>(indexOf(answer, s)));
+            } else {
+                wrongPositionIndex.get(s).add(indexOf(answer,s));
+            }
+        }
+
+        solve();
+
+    }
+
+    public int indexOf(String[] array, String key){
+        for(int i = 0; i < array.length; i++){
+            if(key.equalsIgnoreCase(array[i])){
+                return i;
+            }
+        }
+        return -1;
     }
 }
