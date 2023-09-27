@@ -7,6 +7,8 @@ import java.util.*;
 public class WordSolve {
     private HashMap<String, Integer> letterMap;
     private HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
+    private HashMap<String, Integer> correctPositionIndex = new HashMap<>();
+    String[] topLetters = new String[]{"Q", "Q", "Q", "Q", "Q"};
     private int counter = 0;
     File wordList = new File("resources/words.txt");
 
@@ -15,10 +17,12 @@ public class WordSolve {
     }
 
     public String[] getTopLetters(){
-        String[] topLetters = new String[]{"Q", "Q", "Q", "Q", "Q"};
+        if(counter == 0 || counter == 1) {
+            for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
+                if(correctPositionIndex.containsKey(entry.getKey())) continue;
 
-        for(Map.Entry<String, Integer> entry: letterMap.entrySet()) {
-                loop: for (int i = 0; i < 5; i++) {
+                loop:
+                for (int i = 0; i < 5; i++) {
                     if (letterMap.get(topLetters[i]) < entry.getValue())
                         switch (i) {
                             case 0 -> {
@@ -49,8 +53,12 @@ public class WordSolve {
                             }
                             case 4 -> topLetters[i] = entry.getKey();
                         }
-                    }
                 }
+            }
+        } else {
+
+        }
+
         return topLetters;
     }
 
@@ -63,24 +71,40 @@ public class WordSolve {
 
     public String[] getAnswer(String[] topLetters){
         String[] answer = new String[5];
-        Arrays.sort(topLetters);
+        String word;
+        String[] wordArray;
 
-        try(Scanner listInput = new Scanner(wordList)){
-            String word;
+        try (Scanner listInput = new Scanner(wordList)) {
 
-            while(listInput.hasNextLine()){
-                word = listInput.nextLine().toUpperCase();
+            if(wrongPositionIndex.isEmpty() || counter == 1) {
+                Arrays.sort(topLetters);
 
-                String[] wordArray = word.split("");
-                Arrays.sort(wordArray);
+                while (listInput.hasNextLine()) {
+                    word = listInput.nextLine().toUpperCase();
 
-                if(Arrays.equals(wordArray, topLetters)){
-                    answer = word.split("");
-                    return answer;
+                    wordArray = word.split("");
+                    Arrays.sort(wordArray);
+
+                    if (Arrays.equals(wordArray, topLetters))  return word.split("");
                 }
-            }
+            } else {
+                mainLoop:
+                while(listInput.hasNextLine()){
+                    word = listInput.nextLine().toUpperCase();
+                    wordArray = word.split("");
 
-        } catch (FileNotFoundException e){
+                    for(int i = 0; i < wordArray.length; i++){
+                        if(wrongPositionIndex.containsKey(wordArray[i])){
+                            if(wrongIndexCheck(wordArray[i], i)){
+                                continue mainLoop;
+                            }
+                        }
+                    }
+                    if(Arrays.equals(wordArray,topLetters)) return word.split("");
+                }
+
+            }
+        } catch (FileNotFoundException e) {
             System.err.println(e.getMessage());
         }
 
@@ -130,5 +154,10 @@ public class WordSolve {
             }
         }
         return -1;
+    }
+
+    public boolean wrongIndexCheck(String letter, int index){
+        return (wrongPositionIndex.get(letter).contains(index));
+
     }
 }
