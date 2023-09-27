@@ -31,19 +31,45 @@ public class WordSolve {
                 if(correctPositionIndex.containsKey(entry.getKey())) continue;
 
                 for (int i = 0; i < 5; i++) {
-                    if(topLetters.isEmpty()) topLetters.add(entry.getKey());
+                    if(topLetters.isEmpty() || topLetters.size() < 5) topLetters.add(entry.getKey());
                     else if (letterMap.get(topLetters.get(i)) < entry.getValue()) topLetters.set(i, entry.getKey());
                 }
             }
         } else if(wrongPositionIndex.size() == 5) {
-            int index = 0;
-            for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
-                topLetters.set(index, entry.getKey());
-                index++;
-            }
+            for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()) topLetters.add(entry.getKey());
+
         } else {
             for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
-
+                for(int i = 0; i < 5; i++){
+                    if(topLetters.isEmpty() || topLetters.size() < 5) topLetters.add(entry.getKey());
+                    else if (letterMap.get(topLetters.get(i)) < entry.getValue()) topLetters.set(i, entry.getKey());
+                }
+            }
+            if(!correctPositionIndex.isEmpty()){
+                for(Map.Entry<String, ArrayList<Integer>> entry: correctPositionIndex.entrySet()){
+                    if(topLetters.contains(entry.getKey()) && entry.getValue().size() > 1) {
+                        Collections.sort(entry.getValue());
+                        for (Integer i: correctPositionIndex.get(entry.getKey())){
+                            topLetters.remove(entry.getKey());
+                            topLetters.add(i, entry.getKey());
+                        }
+                    } else if (topLetters.contains(entry.getKey())) {
+                        topLetters.remove(entry.getKey());
+                        topLetters.add(entry.getValue().get(0), entry.getKey());
+                    }
+                }
+            }
+            if(!wrongPositionIndex.isEmpty()){
+                for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
+                    if(topLetters.contains(entry.getKey())){
+                        for(Integer i: entry.getValue()){
+                            if(topLetters.indexOf(entry.getKey()) == i){
+                                topLetters.remove(entry.getKey());
+                                topLetters.add(i, entry.getKey());
+                            }
+                        }
+                    }
+                }
             }
         }
 
