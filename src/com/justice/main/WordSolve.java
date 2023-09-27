@@ -18,7 +18,7 @@ public class WordSolve {
             while(wordFileIn.hasNextLine()){
                 possibleWords.add(wordFileIn.nextLine());
             }
-        }catch (FileNotFoundException e){
+        } catch (FileNotFoundException e){
             System.err.println(e.getMessage());
         }
     }
@@ -128,30 +128,30 @@ public class WordSolve {
         wrongPosition = userIn.nextLine().split(",");
 
         for(String s: wrongPosition){
-            if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(indexOf(answer, s)));
-            else wrongPositionIndex.get(s).add(indexOf(answer,s));
+            if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
+            else wrongPositionIndex.get(s).add(answer.indexOf(s));
         }
 
         System.out.println("Which letters were in the correct position?");
         correctPosition = userIn.nextLine().split(",");
 
         for(String s: correctPosition){
-            if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(indexOf(answer,s)));
-            else correctPositionIndex.get(s).add(indexOf(answer,s));
+            if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
+            else correctPositionIndex.get(s).add(answer.indexOf(s));
         }
 
         solve();
 
     }
 
-    public int indexOf(List<String> array, String key){
-        for(int i = 0; i < array.size(); i++){
-            if(key.equalsIgnoreCase(array.get(i))){
-                return i;
-            }
-        }
-        return -1;
-    }
+//    public int indexOf(List<String> array, String key){
+//        for(int i = 0; i < array.size(); i++){
+//            if(key.equalsIgnoreCase(array.get(i))){
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
 
     public boolean wrongIndexCheck(String letter, int index){
         return (wrongPositionIndex.get(letter).contains(index));
