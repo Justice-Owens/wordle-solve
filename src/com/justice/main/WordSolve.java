@@ -7,100 +7,91 @@ import java.util.*;
 public class WordSolve {
     private HashMap<String, Integer> letterMap;
     private HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
-    private HashMap<String, Integer> correctPositionIndex = new HashMap<>();
-    String[] topLetters = new String[]{"Q", "Q", "Q", "Q", "Q"};
+    private HashMap<String, ArrayList<Integer>> correctPositionIndex = new HashMap<>();
+    private ArrayList<String> possibleWords = new ArrayList<>();
     private int counter = 0;
     File wordList = new File("resources/words.txt");
 
     public WordSolve(HashMap<String, Integer> letterMap) {
         this.letterMap = letterMap;
+        try(Scanner wordFileIn = new Scanner(wordList)){
+            while(wordFileIn.hasNextLine()){
+                possibleWords.add(wordFileIn.nextLine());
+            }
+        }catch (FileNotFoundException e){
+            System.err.println(e.getMessage());
+        }
     }
 
-    public String[] getTopLetters(){
+    public List<String> getTopLetters(){
+        List<String> topLetters = new ArrayList<>();
+
         if(counter == 0 || counter == 1) {
             for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
                 if(correctPositionIndex.containsKey(entry.getKey())) continue;
 
-                loop:
                 for (int i = 0; i < 5; i++) {
-                    if (letterMap.get(topLetters[i]) < entry.getValue())
-                        switch (i) {
-                            case 0 -> {
-                                topLetters[i + 4] = topLetters[i + 3];
-                                topLetters[i + 3] = topLetters[i + 2];
-                                topLetters[i + 2] = topLetters[i + 1];
-                                topLetters[i + 1] = topLetters[i];
-                                topLetters[i] = entry.getKey();
-                                break loop;
-                            }
-                            case 1 -> {
-                                topLetters[i + 3] = topLetters[i + 2];
-                                topLetters[i + 2] = topLetters[i + 1];
-                                topLetters[i + 1] = topLetters[i];
-                                topLetters[i] = entry.getKey();
-                                break loop;
-                            }
-                            case 2 -> {
-                                topLetters[i + 2] = topLetters[i + 1];
-                                topLetters[i + 1] = topLetters[i];
-                                topLetters[i] = entry.getKey();
-                                break loop;
-                            }
-                            case 3 -> {
-                                topLetters[i + 1] = topLetters[i];
-                                topLetters[i] = entry.getKey();
-                                break loop;
-                            }
-                            case 4 -> topLetters[i] = entry.getKey();
-                        }
+                    if(topLetters.isEmpty()) topLetters.add(entry.getKey());
+                    else if (letterMap.get(topLetters.get(i)) < entry.getValue()) topLetters.set(i, entry.getKey());
                 }
             }
+        } else if(wrongPositionIndex.size() == 5) {
+            int index = 0;
+            for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
+                topLetters.set(index, entry.getKey());
+                index++;
+            }
         } else {
+            for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
 
+            }
         }
 
         return topLetters;
     }
 
-    public void removePossibleLetters(String[] incorrectLetters){
+    public void removePossibleWordsAndLetters(String[] incorrectLetters){
 
-        for(String s: incorrectLetters){
-            letterMap.remove(s);
+        for(String s: possibleWords){
+            for(String l: incorrectLetters){
+                if(s.contains(l)) possibleWords.remove(s);
+                letterMap.remove(l);
+            }
         }
     }
 
-    public String[] getAnswer(String[] topLetters){
-        String[] answer = new String[5];
+    public List<String> getAnswer(List<String> topLetters){
+        List<String> answer = new ArrayList<>();
         String word;
-        String[] wordArray;
+        List<String> wordArray;
 
         try (Scanner listInput = new Scanner(wordList)) {
 
             if(wrongPositionIndex.isEmpty() || counter == 1) {
-                Arrays.sort(topLetters);
+                Collections.sort(topLetters);
 
-                while (listInput.hasNextLine()) {
-                    word = listInput.nextLine().toUpperCase();
+                for(String s: possibleWords){
+                    word = s.toUpperCase();
 
-                    wordArray = word.split("");
-                    Arrays.sort(wordArray);
+                    wordArray = Arrays.asList(word.split(""));
+                    Collections.sort(wordArray);
 
-                    if (Arrays.equals(wordArray, topLetters))  return word.split("");
+                    if (wordArray.containsAll(topLetters))  return Arrays.asList(word.split(""));
                 }
             } else {
                 mainLoop:
                 while(listInput.hasNextLine()){
                     word = listInput.nextLine().toUpperCase();
-                    wordArray = word.split("");
+                    wordArray = Arrays.asList(word.split(""));
 
-                    for(int i = 0; i < wordArray.length; i++){
-                        if(wrongPositionIndex.containsKey(wordArray[i])){
-                            if(wrongIndexCheck(wordArray[i], i)){
+                    for(int i = 0; i < wordArray.size(); i++){
+                        if(wrongPositionIndex.containsKey(wordArray.get(i))){
+                            if(wrongIndexCheck(wordArray.get(i), i)){
                                 continue mainLoop;
                             }
                         }
                     }
-                    if(Arrays.equals(wordArray,topLetters)) return word.split("");
+                    if(wordArray.containsAll(topLetters)) return Arrays.asList(word.split(""));
                 }
 
             }
@@ -115,41 +106,47 @@ public class WordSolve {
         Scanner userIn = new Scanner(System.in);
         String[] wrongLetters;
         String[] wrongPosition;
-        String[] letters = getTopLetters();
-        String[] answer = getAnswer(letters);
+        String[] correctPosition;
+        List<String> letters = getTopLetters();
+        List<String> answer = getAnswer(letters);
 
         if(counter == 6){
             System.out.println("All guesses used!");
             return;
         }
 
-        System.out.println("Guess: ");
+        System.out.println("Guess " + counter + 1 + ": ");
         for(String s: answer){
             System.out.print(s);
         }
         System.out.println("Which letters were incorrect: ");
         wrongLetters = userIn.nextLine().split(",");
 
-        removePossibleLetters(wrongLetters);
+        removePossibleWordsAndLetters(wrongLetters);
 
         System.out.println("Which letters were correct and in the wrong position?");
         wrongPosition = userIn.nextLine().split(",");
 
         for(String s: wrongPosition){
-            if(!wrongPositionIndex.containsKey(s)) {
-                wrongPositionIndex.put(s, new ArrayList<>(indexOf(answer, s)));
-            } else {
-                wrongPositionIndex.get(s).add(indexOf(answer,s));
-            }
+            if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(indexOf(answer, s)));
+            else wrongPositionIndex.get(s).add(indexOf(answer,s));
+        }
+
+        System.out.println("Which letters were in the correct position?");
+        correctPosition = userIn.nextLine().split(",");
+
+        for(String s: correctPosition){
+            if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(indexOf(answer,s)));
+            else correctPositionIndex.get(s).add(indexOf(answer,s));
         }
 
         solve();
 
     }
 
-    public int indexOf(String[] array, String key){
-        for(int i = 0; i < array.length; i++){
-            if(key.equalsIgnoreCase(array[i])){
+    public int indexOf(List<String> array, String key){
+        for(int i = 0; i < array.size(); i++){
+            if(key.equalsIgnoreCase(array.get(i))){
                 return i;
             }
         }
