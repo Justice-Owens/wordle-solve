@@ -9,6 +9,7 @@ public class WordSolve {
     private HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
     private HashMap<String, ArrayList<Integer>> correctPositionIndex = new HashMap<>();
     private ArrayList<String> possibleWords = new ArrayList<>();
+    List<String> topLetters = new ArrayList<>();
     private int counter = 0;
     File wordList = new File("resources/words.txt");
 
@@ -24,15 +25,17 @@ public class WordSolve {
     }
 
     public List<String> getTopLetters(){
-        List<String> topLetters = new ArrayList<>();
+        resetTopLetters();
 
         if(counter == 0 || counter == 1) {
             for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
-                if(correctPositionIndex.containsKey(entry.getKey())) continue;
+                if(correctPositionIndex.containsKey(entry.getKey()) || wrongPositionIndex.containsKey(entry.getKey())) continue;
 
                 for (int i = 0; i < 5; i++) {
-                    if(topLetters.isEmpty() || topLetters.size() < 5) topLetters.add(entry.getKey());
-                    else if (letterMap.get(topLetters.get(i)) < entry.getValue()) topLetters.set(i, entry.getKey());
+                    if (letterMap.get(topLetters.get(i)) < entry.getValue()) {
+                        topLetters.set(i, entry.getKey());
+                        break;
+                    }
                 }
             }
         } else if(wrongPositionIndex.size() == 5) {
@@ -41,8 +44,10 @@ public class WordSolve {
         } else {
             for (Map.Entry<String, Integer> entry : letterMap.entrySet()) {
                 for(int i = 0; i < 5; i++){
-                    if(topLetters.isEmpty() || topLetters.size() < 5) topLetters.add(entry.getKey());
-                    else if (letterMap.get(topLetters.get(i)) < entry.getValue()) topLetters.set(i, entry.getKey());
+                    if (letterMap.get(topLetters.get(i)) < entry.getValue()) {
+                        topLetters.set(i, entry.getKey());
+                        break;
+                    }
                 }
             }
             if(!correctPositionIndex.isEmpty()){
@@ -59,18 +64,18 @@ public class WordSolve {
                     }
                 }
             }
-            if(!wrongPositionIndex.isEmpty()){
-                for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
-                    if(topLetters.contains(entry.getKey())){
-                        for(Integer i: entry.getValue()){
-                            if(topLetters.indexOf(entry.getKey()) == i){
-                                topLetters.remove(entry.getKey());
-                                topLetters.add(i, entry.getKey());
-                            }
-                        }
-                    }
-                }
-            }
+//            if(!wrongPositionIndex.isEmpty()){
+//                for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
+//                    if(topLetters.contains(entry.getKey())){
+//                        for(Integer i: entry.getValue()){
+//                            if(topLetters.indexOf(entry.getKey()) == i){
+//                                topLetters.remove(entry.getKey());
+//                                topLetters.add(i, entry.getKey());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
 
         return topLetters;
@@ -78,11 +83,18 @@ public class WordSolve {
 
     public void removePossibleWordsAndLetters(String[] incorrectLetters){
 
-        for(String s: possibleWords){
+        mainloop:
+        for(int i = 0; i < possibleWords.size(); ){
             for(String l: incorrectLetters){
-                if(s.contains(l)) possibleWords.remove(s);
-                letterMap.remove(l);
+                if(possibleWords.get(i).contains(l.toLowerCase())) {
+                    possibleWords.remove(possibleWords.get(i));
+                    continue mainloop;
+                }
             }
+            i++;
+        }
+        for(String l: incorrectLetters){
+            letterMap.remove(l);
         }
     }
 
@@ -132,6 +144,7 @@ public class WordSolve {
         Scanner userIn = new Scanner(System.in);
         String[] wrongLetters;
         String[] wrongPosition;
+        String user;
         String[] correctPosition;
         List<String> letters = getTopLetters();
         List<String> answer = getAnswer(letters);
@@ -146,26 +159,39 @@ public class WordSolve {
             System.out.print(s);
         }
         System.out.println("Which letters were incorrect: ");
-        wrongLetters = userIn.nextLine().split(",");
+        user = userIn.nextLine();
+        if(!user.isBlank())  {
+            wrongLetters = user.split(",");
+            removePossibleWordsAndLetters(wrongLetters);
+            user = "";
+        }
 
-        removePossibleWordsAndLetters(wrongLetters);
 
         System.out.println("Which letters were correct and in the wrong position?");
-        wrongPosition = userIn.nextLine().split(",");
-
-        for(String s: wrongPosition){
-            if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
-            else wrongPositionIndex.get(s).add(answer.indexOf(s));
+        user = userIn.nextLine();
+        if(!user.isBlank()) {
+            wrongPosition = user.split(",");
+            for(String s: wrongPosition){
+                if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
+                else wrongPositionIndex.get(s).add(answer.indexOf(s));
+            }
+            user = "";
         }
+
+
 
         System.out.println("Which letters were in the correct position?");
-        correctPosition = userIn.nextLine().split(",");
-
-        for(String s: correctPosition){
-            if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
-            else correctPositionIndex.get(s).add(answer.indexOf(s));
+        user = userIn.nextLine();
+        if(!user.isBlank()) {
+            correctPosition = user.split(",");
+            for(String s: correctPosition){
+                if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
+                else correctPositionIndex.get(s).add(answer.indexOf(s));
+            }
         }
 
+
+        counter++;
         solve();
 
     }
@@ -182,5 +208,22 @@ public class WordSolve {
     public boolean wrongIndexCheck(String letter, int index){
         return (wrongPositionIndex.get(letter).contains(index));
 
+    }
+
+    public void resetTopLetters(){
+        topLetters.clear();
+        String lowestLetter = "";
+        int lowestOccurrence = 999999;
+
+        for(Map.Entry<String, Integer> entry: letterMap.entrySet()){
+            if(entry.getValue() < lowestOccurrence){
+                lowestLetter = entry.getKey();
+                lowestOccurrence = entry.getValue();
+            }
+        }
+
+        for(int i = 0; i < 5; i++){
+            topLetters.add(lowestLetter);
+        }
     }
 }
