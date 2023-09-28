@@ -17,7 +17,7 @@ public class WordSolve {
         this.letterMap = letterMap;
         try(Scanner wordFileIn = new Scanner(wordList)){
             while(wordFileIn.hasNextLine()){
-                possibleWords.add(wordFileIn.nextLine());
+                possibleWords.add(wordFileIn.nextLine().toUpperCase());
             }
         } catch (FileNotFoundException e){
             System.err.println(e.getMessage());
@@ -86,7 +86,7 @@ public class WordSolve {
         mainloop:
         for(int i = 0; i < possibleWords.size(); ){
             for(String l: incorrectLetters){
-                if(possibleWords.get(i).contains(l.toLowerCase())) {
+                if(possibleWords.get(i).contains(l)) {
                     possibleWords.remove(possibleWords.get(i));
                     continue mainloop;
                 }
