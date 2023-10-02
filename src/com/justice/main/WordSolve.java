@@ -149,12 +149,14 @@ public class WordSolve {
         List<String> letters = getTopLetters();
         List<String> answer = getAnswer(letters);
 
+        while(answer.isEmpty()) answer = findNewAnswer(letters);
+
         if(counter == 6){
             System.out.println("All guesses used!");
             return;
         }
 
-        System.out.println("Guess " + counter + 1 + ": ");
+        System.out.println("Guess " + (counter + 1) + ": ");
         for(String s: answer){
             System.out.print(s);
         }
@@ -194,6 +196,25 @@ public class WordSolve {
         counter++;
         solve();
 
+    }
+
+    private List<String> findNewAnswer(List<String> oldLetters) {
+        List<String> unusedLetters = new ArrayList<>();
+        for(Map.Entry<String, Integer> entry: letterMap.entrySet()) unusedLetters.add(entry.getKey());
+
+        unusedLetters.removeAll(oldLetters);
+        unusedLetters.sort(Comparator.comparingInt(letterMap::get).reversed());
+
+        for(int i = 0; i < topLetters.size(); i++){
+            String currentLetter = topLetters.get(i);
+            int currentCount = letterMap.get(currentLetter);
+
+            if(currentCount < letterMap.get(unusedLetters.get(0))){
+                topLetters.set(i, unusedLetters.remove(0));
+            }
+        }
+
+        return getAnswer(topLetters);
     }
 
 //    public int indexOf(List<String> array, String key){
