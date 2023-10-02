@@ -187,7 +187,7 @@ public class WordSolve {
         if(!user.isBlank()) {
             correctPosition = user.split(",");
             for(String s: correctPosition){
-                if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
+                if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(Arrays.asList(answer.indexOf(s))));
                 else correctPositionIndex.get(s).add(answer.indexOf(s));
             }
         }
