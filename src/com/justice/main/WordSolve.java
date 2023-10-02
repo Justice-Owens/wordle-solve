@@ -198,10 +198,24 @@ public class WordSolve {
                 }
             }
 
-
+            crossCheckWrongAndCorrectIndexes();
             counter++;
         }
         System.out.println("All guesses used!");
+    }
+
+    private void crossCheckWrongAndCorrectIndexes() {
+
+        for(Map.Entry<String, ArrayList<Integer>> entry: wrongPositionIndex.entrySet()){
+            ArrayList<Integer> possiblePositions = new ArrayList<>(Arrays.asList(1,2,3,4,5));
+
+            possiblePositions.removeAll(entry.getValue());
+            if(possiblePositions.size() == 1){
+                if(correctPositionIndex.containsKey(entry.getKey()) && !correctPositionIndex.get(entry.getKey()).contains(possiblePositions.get(0))){
+                    entry.getValue().add(possiblePositions.get(0));
+                }
+            }
+        }
     }
 
     private List<String> searchWordsWithCorrectIndex() {
