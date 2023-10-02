@@ -5,16 +5,19 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class WordSolve {
-    private HashMap<String, Integer> letterMap;
-    private HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
-    private HashMap<String, ArrayList<Integer>> correctPositionIndex = new HashMap<>();
-    private ArrayList<String> possibleWords = new ArrayList<>();
+    private final HashMap<String, Integer> letterMap;
+    private final HashMap<String, ArrayList<Integer>> wrongPositionIndex = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> correctPositionIndex = new HashMap<>();
+    private final ArrayList<String> possibleWords = new ArrayList<>();
     List<String> topLetters = new ArrayList<>();
+    List<String> letters;
     private int counter = 0;
     File wordList = new File("resources/words.txt");
 
     public WordSolve(HashMap<String, Integer> letterMap) {
         this.letterMap = letterMap;
+
+
         try(Scanner wordFileIn = new Scanner(wordList)){
             while(wordFileIn.hasNextLine()){
                 possibleWords.add(wordFileIn.nextLine().toUpperCase());
@@ -83,12 +86,12 @@ public class WordSolve {
 
     public void removePossibleWordsAndLetters(String[] incorrectLetters){
 
-        mainloop:
+        mainLoop:
         for(int i = 0; i < possibleWords.size(); ){
             for(String l: incorrectLetters){
                 if(possibleWords.get(i).contains(l)) {
                     possibleWords.remove(possibleWords.get(i));
-                    continue mainloop;
+                    continue mainLoop;
                 }
             }
             i++;
@@ -146,75 +149,125 @@ public class WordSolve {
         String[] wrongPosition;
         String user;
         String[] correctPosition;
-        List<String> letters = getTopLetters();
-        List<String> answer = getAnswer(letters);
-
-        while(answer.isEmpty()) answer = findNewAnswer(letters);
-
-        if(counter == 6){
-            System.out.println("All guesses used!");
-            return;
-        }
-
-        System.out.println("Guess " + (counter + 1) + ": ");
-        for(String s: answer){
-            System.out.print(s);
-        }
-        System.out.println("Which letters were incorrect: ");
-        user = userIn.nextLine();
-        if(!user.isBlank())  {
-            wrongLetters = user.split(",");
-            removePossibleWordsAndLetters(wrongLetters);
-            user = "";
-        }
 
 
-        System.out.println("Which letters were correct and in the wrong position?");
-        user = userIn.nextLine();
-        if(!user.isBlank()) {
-            wrongPosition = user.split(",");
-            for(String s: wrongPosition){
-                if(!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(answer.indexOf(s)));
-                else wrongPositionIndex.get(s).add(answer.indexOf(s));
+        while(counter < 6) {
+
+            letters = getTopLetters();
+            List<String> answer = getAnswer(letters);
+
+            while (answer.isEmpty()) {
+                answer = findNewAnswer(letters.get(4));
+                if (!answer.isEmpty()) break;
             }
-            user = "";
-        }
 
-
-
-        System.out.println("Which letters were in the correct position?");
-        user = userIn.nextLine();
-        if(!user.isBlank()) {
-            correctPosition = user.split(",");
-            for(String s: correctPosition){
-                if(!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(Arrays.asList(answer.indexOf(s))));
-                else correctPositionIndex.get(s).add(answer.indexOf(s));
+            if(correctPositionIndex.size() >= 4){
+                answer = searchWordsWithCorrectIndex();
             }
+
+            System.out.println("Guess " + (counter + 1) + ": ");
+            for (String s : answer) {
+                System.out.print(s);
+            }
+            System.out.println("\nWhich letters were incorrect: ");
+            user = userIn.nextLine();
+            if (!user.isBlank()) {
+                wrongLetters = user.toUpperCase().split("");
+                removePossibleWordsAndLetters(wrongLetters);
+            }
+
+
+            System.out.println("\nWhich letters were correct and in the wrong position?");
+            user = userIn.nextLine();
+            if (!user.isBlank()) {
+                wrongPosition = user.toUpperCase().split("");
+                for (String s : wrongPosition) {
+                    if (!wrongPositionIndex.containsKey(s)) wrongPositionIndex.put(s, new ArrayList<>(List.of(answer.indexOf(s))));
+                    else if(!wrongPositionIndex.get(s).contains(answer.indexOf(s))) wrongPositionIndex.get(s).add(answer.indexOf(s));
+                }
+            }
+
+
+            System.out.println("\nWhich letters were in the correct position?");
+            user = userIn.nextLine();
+            if (!user.isBlank()) {
+                correctPosition = user.toUpperCase().split("");
+                for (String s : correctPosition) {
+                    if (!correctPositionIndex.containsKey(s)) correctPositionIndex.put(s, new ArrayList<>(List.of(answer.indexOf(s))));
+                    else if (!correctPositionIndex.get(s).contains(answer.indexOf(s))) correctPositionIndex.get(s).add(answer.indexOf(s));
+                }
+            }
+
+
+            counter++;
         }
-
-
-        counter++;
-        solve();
-
+        System.out.println("All guesses used!");
     }
 
-    private List<String> findNewAnswer(List<String> oldLetters) {
-        List<String> unusedLetters = new ArrayList<>();
-        for(Map.Entry<String, Integer> entry: letterMap.entrySet()) unusedLetters.add(entry.getKey());
+    private List<String> searchWordsWithCorrectIndex() {
 
-        unusedLetters.removeAll(oldLetters);
-        unusedLetters.sort(Comparator.comparingInt(letterMap::get).reversed());
-
-        for(int i = 0; i < topLetters.size(); i++){
-            String currentLetter = topLetters.get(i);
-            int currentCount = letterMap.get(currentLetter);
-
-            if(currentCount < letterMap.get(unusedLetters.get(0))){
-                topLetters.set(i, unusedLetters.remove(0));
+        for(String s: possibleWords){
+            int correctPositionCounter = 0;
+            List<String> wordArray = Arrays.asList(s.split(""));
+            for(int i = 0; i < wordArray.size(); i++){
+                if(correctPositionIndex.containsKey(wordArray.get(i)) && correctPositionIndex.get(wordArray.get(i)).contains(i)){
+                    correctPositionCounter++;
+                }
+            }
+            if(correctPositionCounter >=4){
+                return wordArray;
             }
         }
+        return null;
+    }
 
-        return getAnswer(topLetters);
+    private List<String> searchRemainingWords() {
+        List<String> possibleWordArray;
+        List<String> answer = new ArrayList<>();
+
+        mainLoop:
+        for(String s: possibleWords){
+            answer.clear();
+            if(correctPositionIndex.isEmpty()){
+                possibleWordArray = (Arrays.asList(s.split("")));
+                for(int i = 0; i < possibleWordArray.size(); i++){
+                    if(wrongPositionIndex.containsKey(possibleWordArray.get(i)) && wrongPositionIndex.get(possibleWordArray.get(i)).contains(i)){
+                        continue mainLoop;
+                    } else {
+                        if(correctPositionIndex.containsKey(possibleWordArray.get(i)) && correctPositionIndex.get(possibleWordArray.get(i)).contains(i)){
+
+                        }
+                    }
+                }
+                return answer;
+            }
+        }
+        return answer;
+    }
+
+    private List<String> findNewAnswer(String oldLetter) {
+        List<String> unusedLetters = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : letterMap.entrySet()) unusedLetters.add(entry.getKey());
+        unusedLetters.sort(Comparator.comparingInt(letterMap::get).reversed());
+
+        if(!correctPositionIndex.containsKey(oldLetter) && !wrongPositionIndex.containsKey(oldLetter)) {
+            unusedLetters.remove(oldLetter);
+            letters.remove(oldLetter);
+        }
+
+        while(getAnswer(letters).isEmpty()) {
+            for (int i = 0; i < topLetters.size(); i++) {
+                String currentLetter = letters.get(i);
+                int currentCount = letterMap.get(currentLetter);
+
+                if (currentCount < letterMap.get(unusedLetters.get(0))) {
+                    letters.set(i, unusedLetters.remove(0));
+                }
+            }
+            if(unusedLetters.isEmpty()) return searchRemainingWords();
+        }
+        return getAnswer(letters);
     }
 
 //    public int indexOf(List<String> array, String key){
