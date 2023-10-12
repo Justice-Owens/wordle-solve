@@ -206,10 +206,12 @@ public class WordSolve {
     }
 
     private void removeWordsNotContainingIncorrectIndex(List<String> wrongPosition) {
+        String word;
 
         for(String s: wrongPosition){
             for(int i = 0; i < possibleWords.size();){
-                if(!List.of(possibleWords.get(i)).contains(s)) possibleWords.remove(possibleWords.get(i));
+                word = possibleWords.get(i);
+                if(!word.contains(s)) possibleWords.remove(possibleWords.get(i));
                 else i++;
             }
         }
