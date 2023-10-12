@@ -180,6 +180,7 @@ public class WordSolve {
                     else if(!wrongPositionIndex.get(s).contains(answer.indexOf(s))) wrongPositionIndex.get(s).add(answer.indexOf(s));
                 }
                 removeWordsWithLettersAtIncorrectIndex(wrongPosition, answer);
+                removeWordsNotContainingIncorrectIndex(wrongPosition);
             }
 
 
@@ -202,6 +203,16 @@ public class WordSolve {
             counter++;
         }
         System.out.println("All guesses used!");
+    }
+
+    private void removeWordsNotContainingIncorrectIndex(List<String> wrongPosition) {
+
+        for(String s: wrongPosition){
+            for(int i = 0; i < possibleWords.size();){
+                if(!List.of(possibleWords.get(i)).contains(s)) possibleWords.remove(possibleWords.get(i));
+                else i++;
+            }
+        }
     }
 
     private void removeWordsWithLettersAtIncorrectIndex(List<String> letters, List<String> answer) {
