@@ -1,0 +1,3 @@
+# wordle-solve
+This was a simple application inspired after I began completing the daily wordle with friends. The goal was to complete the wordle in a similar amount of time as the average NYT user. It uses a list of all possible words for the wordle taken from the game's source code and
+compares letters that the user indicates are either incorrect, in the wrong position or correct to the possible word list and eliminates words that would not be possible given the information given. To use this application, it uses a command-line UI. The user input can be either uppercase or lowercase and should have no spaces or other characters inbetween. For example, if the incorrect letters are T, R, and S, the user should input them as TRS or trs or any combination of the two.
